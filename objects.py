@@ -37,6 +37,13 @@ class Object:
         self.tz=t_z
         self.escala=escala
 
+        self.eXMin = float('inf')
+        self.eXMax = float('-inf')
+        self.eYMin = float('inf')
+        self.eYMax = float('-inf')
+        self.eZMin = float('inf')
+        self.eZMax = float('-inf')
+
         # Matrizes de transformação do objeto:
         cos_dx = mt.cos(d_x)
         sin_dx = mt.sin(d_x)
@@ -87,6 +94,31 @@ class Object:
 
         load_texture_from_file(self.ID,self.texture_file,tecMag=tecMag)
 
+        print(self.vertices_list[self.vIni : self.vIni + self.vCount])
+
+        def extremidades(vList):
+            
+            for v in vList:
+
+                if(float(v[0]) < self.eXMin):
+                    self.eXMin = float(v[0])
+                elif(float(v[0]) > self.eXMax):
+                    self.eXMax = float(v[0])
+                elif(float(v[1]) < self.eYMin):
+                    self.eYMin = float(v[1])
+                elif(float(v[1]) > self.eYMax):
+                    self.eYMax = float(v[1])
+                elif(float(v[2]) < self.eZMin):
+                    self.eZMin = float(v[2])
+                elif(float(v[2]) > self.eZMax):
+                    self.eZMax = float(v[2])
+                    
+
+        extremidades(self.vertices_list[self.vIni : self.vIni + self.vCount])
+
+        #print(self.eXMin,self.eXMax,self.eYMin,self.eYMax)
+
+
     def setId(self):
 
         Object.__idTextureAvailable += 1 # incrementa o Id
@@ -110,8 +142,61 @@ class Object:
         mat_transform = multiplica_matriz(mat_transform,self.__mat_rotation_y)
         mat_transform = multiplica_matriz(mat_transform,self.__mat_rotation_x)
         mat_transform = multiplica_matriz(mat_transform,self.__mat_escala)
+
+        # Matriz já com as colisões devidamente tratadas
+        mat_transform = self.checaColisao(mat_transform)
         
         return mat_transform
+    
+    def checaColisao(self,mat):
+
+        matAux = mat.reshape(4,4)
+
+        # Paralelepípedo de segurança
+        # Este paralelepípedo lida com as colisões do objeto
+        vExtremos = [
+                     [self.eXMax,self.eYMax,self.eZMax,1.0],[self.eXMax,self.eYMin,self.eZMax,1.0],
+                     [self.eXMax,self.eYMax,self.eZMin,1.0],[self.eXMax,self.eYMin,self.eZMin,1.0],
+                     [self.eXMin,self.eYMax,self.eZMax,1.0],[self.eXMin,self.eYMin,self.eZMax,1.0],
+                     [self.eXMin,self.eYMax,self.eZMin,1.0],[self.eXMin,self.eYMin,self.eZMin,1.0]
+                    ]
+
+        # Analisa extremidades para fora do espaço
+        for vAntes in vExtremos:
+
+            vDepois = matAux @ vAntes
+
+            if(vDepois[0] > 1):
+                self.tx -= (vDepois[0] - 1)
+                matAux[0][3] -= (vDepois[0] - 1)
+
+            if(vDepois[1] > 1):
+                self.ty -= (vDepois[1] - 1)
+                matAux[1][3] -= (vDepois[1] - 1)
+
+            if(vDepois[0] < -1):
+                self.tx -= (vDepois[0] + 1)
+                matAux[0][3] -= (vDepois[0] + 1)
+
+            if(vDepois[1] < -1):
+                self.ty -= (vDepois[1] + 1)
+                matAux[1][3] -= (vDepois[1] + 1)
+
+        # Analisa escala grande demais
+        for vAntes in vExtremos:
+
+            vFixed = matAux @ vAntes
+
+            if(abs(vFixed[0]) > 1 or abs(vFixed[1]) > 1 or abs(vFixed[2]) > 1):
+
+                maxError = max(abs(vFixed[0]),abs(vFixed[1]),abs(vFixed[2]))
+
+                self.escala -= (maxError - 1)/100
+                matAux[0][0] -= (maxError - 1)/100
+                matAux[1][1] -= (maxError - 1)/100
+                matAux[2][2] -= (maxError - 1)/100
+
+        return matAux.reshape(1,16)
     
     def updateMatriz(self):
 
