@@ -202,10 +202,16 @@ class Object:
 
                 maxError = max(abs(vFixed[0]),abs(vFixed[1]),abs(vFixed[2]))
 
-                self.escala -= (maxError - 1)/100
-                matAux[0][0] -= (maxError - 1)/100
-                matAux[1][1] -= (maxError - 1)/100
-                matAux[2][2] -= (maxError - 1)/100
+                if(self.escala > 0):
+                    self.escala -= (maxError - 1)/100
+                    matAux[0][0] -= (maxError - 1)/100
+                    matAux[1][1] -= (maxError - 1)/100
+                    matAux[2][2] -= (maxError - 1)/100
+                else:
+                    self.escala += (maxError - 1)/100
+                    matAux[0][0] += (maxError - 1)/100
+                    matAux[1][1] += (maxError - 1)/100
+                    matAux[2][2] += (maxError - 1)/100
 
         return matAux.reshape(1,16)
     
