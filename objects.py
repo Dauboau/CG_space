@@ -94,30 +94,39 @@ class Object:
 
         load_texture_from_file(self.ID,self.texture_file,tecMag=tecMag)
 
-        print(self.vertices_list[self.vIni : self.vIni + self.vCount])
+        #print(self.vertices_list[self.vIni : self.vIni + self.vCount])
 
-        def extremidades(vList):
-            
-            for v in vList:
+        self.__extremidades(self.vertices_list[self.vIni : self.vIni + self.vCount])
 
-                if(float(v[0]) < self.eXMin):
-                    self.eXMin = float(v[0])
-                elif(float(v[0]) > self.eXMax):
-                    self.eXMax = float(v[0])
-                elif(float(v[1]) < self.eYMin):
-                    self.eYMin = float(v[1])
-                elif(float(v[1]) > self.eYMax):
-                    self.eYMax = float(v[1])
-                elif(float(v[2]) < self.eZMin):
-                    self.eZMin = float(v[2])
-                elif(float(v[2]) > self.eZMax):
-                    self.eZMax = float(v[2])
-                    
-
-        extremidades(self.vertices_list[self.vIni : self.vIni + self.vCount])
+        self.__centralizar()
 
         #print(self.eXMin,self.eXMax,self.eYMin,self.eYMax)
 
+    def __centralizar(self):
+
+        vCentral = np.array([(self.eXMax-self.eXMin)/2,(self.eYMax-self.eYMin)/2,(self.eZMax-self.eZMin)/2,1.0])
+        vCentral = self.getMatTransform().reshape(4,4) @ vCentral
+
+        #self.tx -= vCentral[0]
+        self.ty -= vCentral[1]
+        #self.tz -= vCentral[2]
+
+    def __extremidades(self,vList):
+            
+        for v in vList:
+
+            if(float(v[0]) < self.eXMin):
+                self.eXMin = float(v[0])
+            elif(float(v[0]) > self.eXMax):
+                self.eXMax = float(v[0])
+            elif(float(v[1]) < self.eYMin):
+                self.eYMin = float(v[1])
+            elif(float(v[1]) > self.eYMax):
+                self.eYMax = float(v[1])
+            elif(float(v[2]) < self.eZMin):
+                self.eZMin = float(v[2])
+            elif(float(v[2]) > self.eZMax):
+                self.eZMax = float(v[2])
 
     def setId(self):
 
