@@ -104,12 +104,14 @@ class Object:
 
     def __centralizar(self):
 
-        vCentral = np.array([(self.eXMax-self.eXMin)/2,(self.eYMax-self.eYMin)/2,(self.eZMax-self.eZMin)/2,1.0])
-        vCentral = self.getMatTransform().reshape(4,4) @ vCentral
+        vCentral = np.array([(self.eXMax + self.eXMin)/2,(self.eYMax + self.eYMin)/2,(self.eZMax + self.eZMin)/2,1.0])
+        vCentral = self.__mat_escala.reshape(4,4) @ vCentral
 
-        #self.tx -= vCentral[0]
+        print(vCentral)
+
+        self.tx -= vCentral[0]
         self.ty -= vCentral[1]
-        #self.tz -= vCentral[2]
+        self.tz -= vCentral[2]
 
     def __extremidades(self,vList):
             
