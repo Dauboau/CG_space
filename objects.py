@@ -22,7 +22,7 @@ class Object:
 
         self.model_file = model_file
         self.texture_file = texture_file
-        self.ID = self.setId()
+        self.ID = self.__setId()
 
         self.vIni = -1
         self.vCount = -1
@@ -128,7 +128,7 @@ class Object:
             elif(float(v[2]) > self.eZMax):
                 self.eZMax = float(v[2])
 
-    def setId(self):
+    def __setId(self):
 
         Object.__idTextureAvailable += 1 # incrementa o Id
 
@@ -145,7 +145,7 @@ class Object:
     def getMatTransform(self):
 
         # Atualiza as matrizes de transformação para o estado mais atual
-        self.updateMatriz()
+        self.__updateMatriz()
         
         mat_transform = multiplica_matriz(self.__mat_translation,self.__mat_rotation_z)
         mat_transform = multiplica_matriz(mat_transform,self.__mat_rotation_y)
@@ -153,11 +153,11 @@ class Object:
         mat_transform = multiplica_matriz(mat_transform,self.__mat_escala)
 
         # Matriz já com as colisões devidamente tratadas
-        mat_transform = self.checaColisao(mat_transform)
+        mat_transform = self.__checaColisao(mat_transform)
         
         return mat_transform
     
-    def checaColisao(self,mat):
+    def __checaColisao(self,mat):
 
         matAux = mat.reshape(4,4)
 
@@ -207,7 +207,7 @@ class Object:
 
         return matAux.reshape(1,16)
     
-    def updateMatriz(self):
+    def __updateMatriz(self):
 
         # Translação:
         self.__mat_translation[3] = self.tx
